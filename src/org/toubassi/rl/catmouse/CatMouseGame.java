@@ -32,12 +32,14 @@ public class CatMouseGame {
     private int mouseWins;
     private int catWins;
     private int mouseWinStreak;
+    private boolean verbose;
 
-    public CatMouseGame(Player catPlayer, Player mousePlayer) {
+    public CatMouseGame(Player catPlayer, Player mousePlayer, boolean verbose) {
         catPos = new Point(1, 1);
         mousePos = new Point(4, 4);
         this.catPlayer = catPlayer;
         this.mousePlayer = mousePlayer;
+        this.verbose = verbose;
     }
 
     public Point getMousePosition() {
@@ -50,6 +52,14 @@ public class CatMouseGame {
 
     public boolean isPointOnWall(Point p) {
         return (p.y == 2 && p.x >= 1 && p.x <= 3);
+    }
+
+    public int runBatch(int numEpisodes) {
+        mouseWins = catWins = 0;
+        for (int i = 0; i < numEpisodes; i++) {
+            runEpisode();
+        }
+        return mouseWins;
     }
 
     public void runEpisode() {
@@ -84,14 +94,16 @@ public class CatMouseGame {
             throw new RuntimeException("Unexpected termination");
         }
 
-        System.out.print("Episode " + episodeCount() + " ");
-        if (didMouseWin) {
-            System.out.print("Mouse wins! ");
+        if (verbose) {
+            System.out.print("Episode " + episodeCount() + " ");
+            if (didMouseWin) {
+                System.out.print("Mouse wins! ");
+            }
+            else {
+                System.out.print("Mouse loses :-( ");
+            }
+            System.out.println("Mouse wins " + (((float) mouseWins) / episodeCount() * 100) + "% of the time (win streak = " + mouseWinStreak + ")");
         }
-        else {
-            System.out.print("Mouse loses :-( ");
-        }
-        System.out.println("Mouse wins " + (((float) mouseWins) / episodeCount() * 100) + "% of the time (win streak = " + mouseWinStreak + ")");
 
         endEpisode();
     }
@@ -149,6 +161,9 @@ public class CatMouseGame {
     }
 
     private void printGame() {
+        if (!verbose) {
+            return;
+        }
         System.out.println("-------");
         for (int row = 0; row < 5; row++) {
             StringBuilder builder = new StringBuilder("     ");
@@ -174,10 +189,11 @@ public class CatMouseGame {
     }
 
     public static void main(String[] args) {
-        CatMouseGame game = new CatMouseGame(new SimpleCatPlayer(), new SarsaMousePlayer());
+        CatMouseGame game = new CatMouseGame(new SimpleCatPlayer(), new SarsaMousePlayer(), false);
 
-        for (int i = 0; i < 10000; i++) {
-            game.runEpisode();
+        for (int i = 0; i < 100; i++) {
+            int mouseWins = game.runBatch(100);
+            System.out.println("Batch " + (i + 1) + " Mouse wins " + mouseWins + "% of the time");
         }
     }
 }
