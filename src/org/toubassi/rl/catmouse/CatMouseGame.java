@@ -27,6 +27,7 @@ public class CatMouseGame {
 
     private int width;
     private int height;
+    private float timeStepReward; // Set to -something like -.05 to encourage faster games
     private Point catPos;
     private Point mousePos;
     private Player catPlayer;
@@ -36,11 +37,12 @@ public class CatMouseGame {
     private int mouseWinStreak;
     private boolean verbose;
 
-    public CatMouseGame(int width, int height, boolean verbose) {
+    public CatMouseGame(int width, int height, float timeStepReward, boolean verbose) {
         this.width = width;
         this.height = height;
         catPos = new Point(1, 1);
         mousePos = new Point(width - 1, height - 1);
+        this.timeStepReward = timeStepReward;
         this.verbose = verbose;
     }
 
@@ -90,21 +92,23 @@ public class CatMouseGame {
 
     public int runBatch(int numEpisodes) {
         mouseWins = catWins = 0;
+        int numSteps = 0;
         for (int i = 0; i < numEpisodes; i++) {
-            runEpisode();
+            numSteps += runEpisode();
         }
+        //System.out.println("Total steps in batch: " + numSteps);
         return mouseWins;
     }
 
-    public void runEpisode() {
+    public int runEpisode() {
         int step = 0;
         printGame();
         while (!isGameOver()) {
             if (step % 2 == 0) {
-                processMove(mousePos, mousePlayer.makeMove(this, 0f));
+                processMove(mousePos, mousePlayer.makeMove(this, timeStepReward));
             }
             else {
-                processMove(catPos, catPlayer.makeMove(this, 0f));
+                processMove(catPos, catPlayer.makeMove(this, timeStepReward));
             }
             printGame();
             step++;
@@ -140,6 +144,7 @@ public class CatMouseGame {
         }
 
         endEpisode();
+        return step;
     }
 
     private void endEpisode() {
@@ -221,12 +226,12 @@ public class CatMouseGame {
     }
 
     public static void main(String[] args) {
-        CatMouseGame game = new CatMouseGame(5, 5, false);
+        CatMouseGame game = new CatMouseGame(15, 15, -.05f, false);
         game.setCatPlayer(new SimpleCatPlayer());
         game.setMousePlayer(new SarsaMousePlayer(game));
 
         int numEpisodesPerBatch = 100;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 200; i++) {
             int mouseWins = game.runBatch(numEpisodesPerBatch);
             System.out.println("Batch " + (i + 1) + " Mouse wins " + (mouseWins * 100 / numEpisodesPerBatch) + "% of the time");
         }
