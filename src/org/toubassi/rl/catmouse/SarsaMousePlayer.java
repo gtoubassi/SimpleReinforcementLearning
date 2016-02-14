@@ -9,15 +9,14 @@ import java.util.Random;
  */
 public class SarsaMousePlayer extends Player {
 
-    private float[][] Q = new float[25*32+25][5];
-    private float epsilon;
-    private float alpha;
-    private float gamma;
-    private Random random = new Random(123456L);
-    private int lastState = -1;
-    private int lastAction;
-    private boolean wasLastActionRandom;
-    private int episodeCount = 0;
+    protected Random random = new Random(123456L);
+    protected float[][] Q = new float[25*32+25][5];
+    protected float epsilon;
+    protected float alpha;
+    protected float gamma;
+    protected int lastState = -1;
+    protected int lastAction;
+    protected boolean wasLastActionRandom;
 
     public SarsaMousePlayer() {
         this(.1f, .90f, .95f);
@@ -33,21 +32,25 @@ public class SarsaMousePlayer extends Player {
         int state = stateForGame(game);
         int action = pickActionEpsilonGreedy(state);
         Move move = moves[action];
+
         if (lastState != -1) {
-            float qLast = Q[lastState][lastAction];
-            float qThis = Q[state][action];
-            Q[lastState][lastAction] += alpha * (reward + gamma * qThis - qLast);
+            updateQForSarsa(lastState, lastAction, reward, state, action);
         }
         lastState = state;
         lastAction = action;
         return move;
     }
 
+    protected void updateQForSarsa(int lastState, int lastAction, float reward, int state, int action) {
+        float qLast = Q[lastState][lastAction];
+        float qThis = Q[state][action];
+        Q[lastState][lastAction] += alpha * (reward + gamma * qThis - qLast);
+    }
+
     public void endEpisode() {
         epsilon *= .999;
         lastState = -1;
         lastAction = 0;
-        episodeCount++;
     }
 
     private int pickActionEpsilonGreedy(int state) {
@@ -81,21 +84,6 @@ public class SarsaMousePlayer extends Player {
         // can be in (25 - the 3 walls), so there are only 22*22 = 484
         // states.
         return (catState << 5) | mouseState;
-    }
-
-    public float fractionOfStateActionSpacePopulated() {
-        int zero = 0, nonzero = 0;
-        for (int i = 0 ; i < Q.length; i++) {
-            for (int j = 0 ; j < Q[i].length; j++) {
-                if (Q[i][j] == 0) {
-                    zero++;
-                }
-                else {
-                    nonzero++;
-                }
-            }
-        }
-        return ((float)nonzero)/(zero + nonzero);
     }
 
     public void printLastStateAction() {
