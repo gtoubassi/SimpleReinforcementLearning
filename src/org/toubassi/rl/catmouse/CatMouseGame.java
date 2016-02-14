@@ -140,7 +140,7 @@ public class CatMouseGame {
             else {
                 System.out.print("Mouse loses :-( ");
             }
-            System.out.println("Mouse wins " + (((float) mouseWins) / episodeCount() * 100) + "% of the time (win streak = " + mouseWinStreak + ")");
+            System.out.println("Mouse wins " + (((float) mouseWins) / episodeCount() * 100) + "% of the time (win streak = " + mouseWinStreak + ") " + step);
         }
 
         endEpisode();
@@ -226,12 +226,12 @@ public class CatMouseGame {
     }
 
     public static void main(String[] args) {
-        CatMouseGame game = new CatMouseGame(15, 15, -.05f, false);
+        CatMouseGame game = new CatMouseGame(5, 5, -.05f, false);
         game.setCatPlayer(new SimpleCatPlayer());
         game.setMousePlayer(new SarsaMousePlayer(game));
 
         int numEpisodesPerBatch = 100;
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 100; i++) {
             int mouseWins = game.runBatch(numEpisodesPerBatch);
             System.out.println("Batch " + (i + 1) + " Mouse wins " + (mouseWins * 100 / numEpisodesPerBatch) + "% of the time");
         }
