@@ -22,12 +22,11 @@ import java.util.Random;
  * this algorithm would be more useful.
  */
 public class TooCleverByHalfCatPlayer extends Player {
-    private Random random = new Random(123456L);
     private float visits[][];
     private Point lastSightedMousePosition;
 
-    public TooCleverByHalfCatPlayer() {
-        visits = new float[5][5];
+    public TooCleverByHalfCatPlayer(CatMouseGame game) {
+        visits = new float[game.getWidth()][game.getHeight()];
         endEpisode();
     }
 

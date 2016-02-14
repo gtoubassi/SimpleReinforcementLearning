@@ -25,6 +25,8 @@ package org.toubassi.rl.catmouse;
 public class CatMouseGame {
     private static Point CheesePos = new Point(0, 0);
 
+    private int width;
+    private int height;
     private Point catPos;
     private Point mousePos;
     private Player catPlayer;
@@ -34,12 +36,28 @@ public class CatMouseGame {
     private int mouseWinStreak;
     private boolean verbose;
 
-    public CatMouseGame(Player catPlayer, Player mousePlayer, boolean verbose) {
+    public CatMouseGame(int width, int height, boolean verbose) {
+        this.width = width;
+        this.height = height;
         catPos = new Point(1, 1);
-        mousePos = new Point(4, 4);
-        this.catPlayer = catPlayer;
-        this.mousePlayer = mousePlayer;
+        mousePos = new Point(width - 1, height - 1);
         this.verbose = verbose;
+    }
+
+    public void setMousePlayer(Player player) {
+        mousePlayer = player;
+    }
+
+    public void setCatPlayer(Player player) {
+        catPlayer = player;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public Point getMousePosition() {
@@ -51,7 +69,23 @@ public class CatMouseGame {
     }
 
     public boolean isPointOnWall(Point p) {
-        return (p.y == 2 && p.x >= 1 && p.x <= 3) || p.x < 0 || p.x > 4 || p.y < 0 || p.y > 4;
+        return isPointOnWall(p.x, p.y);
+    }
+
+    public boolean isPointOnWall(int x, int y) {
+        // First check exterior walls
+        if (x < 0 || x >= width || y < 0 || y >= height) {
+            return true;
+        }
+
+        // Check the center barrier
+        if (y == height / 2) {
+            if (x >= (int)(.2 * width) && x < (int)(.8 * width)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public int runBatch(int numEpisodes) {
@@ -110,7 +144,7 @@ public class CatMouseGame {
 
     private void endEpisode() {
         catPos = new Point(1, 1);
-        mousePos = new Point(4, 4);
+        mousePos = new Point(width - 1, height - 1);
         catPlayer.endEpisode();
         mousePlayer.endEpisode();
     }
@@ -122,34 +156,22 @@ public class CatMouseGame {
     private void processMove(Point pos, Player.Move move) {
         switch (move) {
             case Up:
-                if (pos.y == 0 || (pos.y == 3 && pos.x >= 1 && pos.x <= 3)) {
-                    // you are hitting a wall NOOP
-                }
-                else {
+                if (!isPointOnWall(pos.x, pos.y - 1)) {
                     pos.y--;
                 }
                 break;
             case Down:
-                if (pos.y == 4 || (pos.y == 1 && pos.x >= 1 && pos.x <= 3)) {
-                    // you are hitting a wall NOOP
-                }
-                else {
+                if (!isPointOnWall(pos.x, pos.y + 1)) {
                     pos.y++;
                 }
                 break;
             case Left:
-                if (pos.x == 0 || (pos.y == 2 && pos.x == 4)) {
-                    // you are hitting a wall NOOP
-                }
-                else {
+                if (!isPointOnWall(pos.x - 1, pos.y)) {
                     pos.x--;
                 }
                 break;
             case Right:
-                if (pos.x == 4 || (pos.y == 2 && pos.x == 0)) {
-                    // you are hitting a wall NOOP
-                }
-                else {
+                if (!isPointOnWall(pos.x + 1, pos.y)) {
                     pos.x++;
                 }
                 break;
@@ -164,17 +186,24 @@ public class CatMouseGame {
         if (!verbose) {
             return;
         }
-        System.out.println("-------");
-        for (int row = 0; row < 5; row++) {
-            StringBuilder builder = new StringBuilder("     ");
+        for (int col = 0; col < width + 2; col++) {
+            System.out.print('-');
+        }
+        System.out.println();
+        for (int row = 0; row < height; row++) {
+            StringBuilder builder = new StringBuilder();
+
             System.out.print("|");
+
+            for (int col = 0; col < width; col++) {
+                builder.append(' ');
+                if (isPointOnWall(col, row)) {
+                    builder.setCharAt(col, 'X');
+                }
+            }
+
             if (row == 0) {
                 builder.setCharAt(0, '*'); // Cheese
-            }
-            if (row == 2) {
-                builder.setCharAt(1, 'X');
-                builder.setCharAt(2, 'X');
-                builder.setCharAt(3, 'X');
             }
             if (row == mousePos.y) {
                 builder.setCharAt(mousePos.x, 'm');
@@ -185,11 +214,16 @@ public class CatMouseGame {
             System.out.print(builder.toString());
             System.out.println("|");
         }
-        System.out.println("-------");
+        for (int col = 0; col < width + 2; col++) {
+            System.out.print('-');
+        }
+        System.out.println();
     }
 
     public static void main(String[] args) {
-        CatMouseGame game = new CatMouseGame(new SimpleCatPlayer(), new SarsaMousePlayer(), false);
+        CatMouseGame game = new CatMouseGame(5, 5, false);
+        game.setCatPlayer(new SimpleCatPlayer());
+        game.setMousePlayer(new SarsaMousePlayer(game));
 
         int numEpisodesPerBatch = 100;
         for (int i = 0; i < 100; i++) {

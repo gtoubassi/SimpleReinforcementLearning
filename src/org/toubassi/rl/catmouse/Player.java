@@ -1,9 +1,13 @@
 package org.toubassi.rl.catmouse;
 
+import java.util.Random;
+
 /**
  * Base class for all Cat or Mouse player agents.
  */
 public abstract class Player {
+    protected static Random random = new Random(123456L);
+
     public enum Move {Up, Down, Left, Right, Stay};
     public static Move[] moves = Move.values();
 

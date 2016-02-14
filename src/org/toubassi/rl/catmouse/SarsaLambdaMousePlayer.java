@@ -15,16 +15,17 @@ import java.util.Random;
  * See https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node77.html
  */
 public class SarsaLambdaMousePlayer extends SarsaMousePlayer {
-    private float[][] E = new float[25*32+25][5];
+    private float[][] E;
     private float lambda;
 
-    public SarsaLambdaMousePlayer() {
-        this(.1f, .90f, .6f, .95f);
+    public SarsaLambdaMousePlayer(CatMouseGame game) {
+        this(game, .1f, .90f, .6f, .95f);
     }
 
-    public SarsaLambdaMousePlayer(float epsilon, float alpha, float lambda, float gamma) {
-        super(epsilon, alpha, gamma);
+    public SarsaLambdaMousePlayer(CatMouseGame game, float epsilon, float alpha, float lambda, float gamma) {
+        super(game, epsilon, alpha, gamma);
         this.lambda = lambda;
+        E = new float[Q.length][Q[0].length];
     }
 
     @Override

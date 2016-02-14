@@ -1,7 +1,5 @@
 package org.toubassi.rl.catmouse;
 
-import java.util.Random;
-
 /**
  * Implements a naive SARSA(0) learning agent that uses
  * an epsilon-greedy policy (epsilon starts at .1 and
@@ -9,8 +7,9 @@ import java.util.Random;
  */
 public class SarsaMousePlayer extends Player {
 
-    protected Random random = new Random(123456L);
-    protected float[][] Q = new float[25*32+25][5];
+    protected float[][] Q;
+    protected int maxPlayerState;
+    protected int[][] positionToPlayerState;
     protected float epsilon;
     protected float alpha;
     protected float gamma;
@@ -18,14 +17,37 @@ public class SarsaMousePlayer extends Player {
     protected int lastAction;
     protected boolean wasLastActionRandom;
 
-    public SarsaMousePlayer() {
-        this(.1f, .90f, .95f);
+    public SarsaMousePlayer(CatMouseGame game) {
+        this(game, .1f, .90f, .95f);
     }
 
-    public SarsaMousePlayer(float epsilon, float alpha, float gamma) {
+    public SarsaMousePlayer(CatMouseGame game, float epsilon, float alpha, float gamma) {
         this.epsilon = epsilon;
         this.alpha = alpha;
         this.gamma = gamma;
+
+        // Calculate how many unique states the player can be in.
+        // This is basically width * height - # of interior walls.
+        // At the same time find a mapping of a (legal) position
+        // to a state.
+        maxPlayerState = 0;
+        positionToPlayerState = new int[game.getWidth()][game.getHeight()];
+        for (int y = 0; y < game.getHeight(); y++) {
+            for (int x = 0; x < game.getWidth(); x++) {
+                if (game.isPointOnWall(x, y)) {
+                    positionToPlayerState[x][y] = -1;
+                }
+                else {
+                    positionToPlayerState[x][y] = maxPlayerState++;
+                }
+            }
+        }
+        maxPlayerState++;
+
+        // Overall game state is conceptual two dimensions (which we
+        // linearize) one dimension for each player which ranges
+        // [0, maxPlayerState).
+        Q = new float[maxPlayerState * maxPlayerState][moves.length];
     }
 
     public Move makeMove(CatMouseGame game, float reward) {
@@ -56,14 +78,14 @@ public class SarsaMousePlayer extends Player {
     private int pickActionEpsilonGreedy(int state) {
         if (random.nextFloat() > (1 - epsilon)) {
             wasLastActionRandom = true;
-            return random.nextInt(5);
+            return random.nextInt(moves.length);
         }
 
         wasLastActionRandom = false;
 
         int maxAction = 0;
         float maxValue = Q[state][0];
-        for (int i = 1; i < 5; i++) {
+        for (int i = 1; i < moves.length; i++) {
             if (Q[state][i] > maxValue) {
                 maxValue = Q[state][i];
                 maxAction = i;
@@ -74,26 +96,10 @@ public class SarsaMousePlayer extends Player {
 
     private int stateForGame(CatMouseGame game) {
         Point catPos = game.getCatPosition();
-        int catState = catPos.y * 5 + catPos.x;
+        int catState = positionToPlayerState[catPos.x][catPos.y];
         Point mousePos = game.getMousePosition();
-        int mouseState = mousePos.y * 5 + mousePos.x;
+        int mouseState = positionToPlayerState[mousePos.x][mousePos.y];
 
-        // This is an odd/sparse encoding for convenience.
-        // It implies there are 10 bits worth of states (2^10=1024)
-        // But really there are only 22 positions the cat and mouse
-        // can be in (25 - the 3 walls), so there are only 22*22 = 484
-        // states.
-        return (catState << 5) | mouseState;
+        return catState * maxPlayerState + mouseState;
     }
-
-    public void printLastStateAction() {
-        int mouseState = lastState & 31;
-        int catState = lastState >> 5;
-        int mouseX = mouseState % 5;
-        int mouseY = mouseState / 5;
-        int catX = catState % 5;
-        int catY = catState / 5;
-        System.out.println("Last: m=" + mouseX + "," + mouseY + "  c=" + catX + "," + catY + "  " + lastState + " " + moves[lastAction] + " " + wasLastActionRandom);
-    }
-
 }
