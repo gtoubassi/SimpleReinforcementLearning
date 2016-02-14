@@ -11,7 +11,7 @@ import java.util.Random;
  * simple example with this naive/unoptimized implementation it is probably
  * slower (on balance) to train a winning agent.  Meaning it trains in
  * fewer episodes but burns more total CPU per episode.
- * 
+ *
  * See https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node77.html
  */
 public class SarsaLambdaMousePlayer extends SarsaMousePlayer {

@@ -191,9 +191,10 @@ public class CatMouseGame {
     public static void main(String[] args) {
         CatMouseGame game = new CatMouseGame(new SimpleCatPlayer(), new SarsaMousePlayer(), false);
 
+        int numEpisodesPerBatch = 100;
         for (int i = 0; i < 100; i++) {
-            int mouseWins = game.runBatch(100);
-            System.out.println("Batch " + (i + 1) + " Mouse wins " + mouseWins + "% of the time");
+            int mouseWins = game.runBatch(numEpisodesPerBatch);
+            System.out.println("Batch " + (i + 1) + " Mouse wins " + (mouseWins * 100 / numEpisodesPerBatch) + "% of the time");
         }
     }
 }
