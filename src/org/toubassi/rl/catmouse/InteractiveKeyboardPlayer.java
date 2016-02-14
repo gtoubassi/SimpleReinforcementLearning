@@ -11,6 +11,12 @@ public class InteractiveKeyboardPlayer extends Player {
     public Player.Move makeMove(CatMouseGame game, float reward) {
         byte[] buf = new byte[4];
 
+        if (game.isGameOver()) {
+            // We get invoked one final time to give us the reward
+            // which is not useful for this player.
+            return Move.Stay;
+        }
+
         try {
             while (true) {
                 System.out.print("Enter a move (u=up, d=down, l=left, r=right, s=stay): ");

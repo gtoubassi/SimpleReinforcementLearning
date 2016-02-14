@@ -10,6 +10,10 @@ public class Point {
         this.y = y;
     }
 
+    public Point clone() {
+        return new Point(x, y);
+    }
+
     public boolean equals(Object other) {
         if (other instanceof Point) {
             Point p = (Point)other;

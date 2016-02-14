@@ -51,7 +51,7 @@ public class CatMouseGame {
     }
 
     public boolean isPointOnWall(Point p) {
-        return (p.y == 2 && p.x >= 1 && p.x <= 3);
+        return (p.y == 2 && p.x >= 1 && p.x <= 3) || p.x < 0 || p.x > 4 || p.y < 0 || p.y > 4;
     }
 
     public int runBatch(int numEpisodes) {
