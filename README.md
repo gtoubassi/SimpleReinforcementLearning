@@ -330,3 +330,4 @@ Below is a sample run where the mouse manages to avoid the cat by going around t
     |     |
     |     |
     -------
+    Mouse wins!
