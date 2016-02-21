@@ -7,7 +7,7 @@ package org.toubassi.rl.catmouse;
  */
 public class SarsaMousePlayer extends Player {
 
-    protected float[][] Q;
+    protected ActionValueTable Q;
     protected int maxPlayerState;
     protected int[][] positionToPlayerState;
     protected float epsilon;
@@ -42,12 +42,11 @@ public class SarsaMousePlayer extends Player {
                 }
             }
         }
-        maxPlayerState++;
 
-        // Overall game state is conceptual two dimensions (which we
+        // Overall game state is conceptually two dimensions (which we
         // linearize) one dimension for each player which ranges
         // [0, maxPlayerState).
-        Q = new float[maxPlayerState * maxPlayerState][moves.length];
+        this.Q = new ActionValueTable(maxPlayerState * maxPlayerState, moves.length);
     }
 
     public Move makeMove(CatMouseGame game, float reward) {
@@ -64,9 +63,9 @@ public class SarsaMousePlayer extends Player {
     }
 
     protected void updateQForSarsa(int lastState, int lastAction, float reward, int state, int action) {
-        float qLast = Q[lastState][lastAction];
-        float qThis = Q[state][action];
-        Q[lastState][lastAction] += alpha * (reward + gamma * qThis - qLast);
+        float qLast = Q.get(lastState, lastAction);
+        float qThis = Q.get(state, action);
+        Q.set(lastState, lastAction, qLast + alpha * (reward + gamma * qThis - qLast));
     }
 
     public void endEpisode() {
@@ -84,10 +83,10 @@ public class SarsaMousePlayer extends Player {
         wasLastActionRandom = false;
 
         int maxAction = 0;
-        float maxValue = Q[state][0];
+        float maxValue = Q.get(state, 0);
         for (int i = 1; i < moves.length; i++) {
-            if (Q[state][i] > maxValue) {
-                maxValue = Q[state][i];
+            if (Q.get(state, i) > maxValue) {
+                maxValue = Q.get(state, i);
                 maxAction = i;
             }
         }

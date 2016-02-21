@@ -15,7 +15,7 @@ import java.util.Random;
  * See https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node77.html
  */
 public class SarsaLambdaMousePlayer extends SarsaMousePlayer {
-    private float[][] E;
+    private ActionValueTable E;
     private float lambda;
 
     public SarsaLambdaMousePlayer(CatMouseGame game) {
@@ -25,29 +25,27 @@ public class SarsaLambdaMousePlayer extends SarsaMousePlayer {
     public SarsaLambdaMousePlayer(CatMouseGame game, float epsilon, float alpha, float lambda, float gamma) {
         super(game, epsilon, alpha, gamma);
         this.lambda = lambda;
-        E = new float[Q.length][Q[0].length];
+        E = new ActionValueTable(Q.getNumStates(), Q.getNumActions());
     }
 
     @Override
     protected void updateQForSarsa(int lastState, int lastAction, float reward, int state, int action) {
-        float qLast = Q[lastState][lastAction];
-        float qThis = Q[state][action];
+        float qLast = Q.get(lastState, lastAction);
+        float qThis = Q.get(state, action);
         float delta = reward + gamma * qThis - qLast;
 
-        E[lastState][lastAction] += 1f;
+        E.set(lastState, lastAction, E.get(lastState, lastAction) + 1f);
 
-        for (int s = 0; s < Q.length; s++) {
-            for (int a = 0; a < Q[s].length; a++) {
-                Q[s][a] += alpha * delta * E[s][a];
-                E[s][a] *= gamma * lambda;
+        for (int s = 0; s < Q.getNumStates(); s++) {
+            for (int a = 0; a < Q.getNumActions(); a++) {
+                Q.set(s, a, Q.get(s, a) + alpha * delta * E.get(s, a));
+                E.set(s, a, E.get(s, a) * gamma * lambda);
             }
         }
     }
 
     public void endEpisode() {
         super.endEpisode();
-        for (int i = 0; i < E.length; i++) {
-            Arrays.fill(E[i], 0f);
-        }
+        E.setAll(0f);
     }
 }
