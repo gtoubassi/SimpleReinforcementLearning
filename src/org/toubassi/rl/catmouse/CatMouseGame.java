@@ -25,6 +25,7 @@ package org.toubassi.rl.catmouse;
 public class CatMouseGame {
     private static Point CheesePos = new Point(0, 0);
 
+    private int step;
     private int width;
     private int height;
     private float timeStepReward; // Set to -something like -.05 to encourage faster games
@@ -32,9 +33,6 @@ public class CatMouseGame {
     private Point mousePos;
     private Player catPlayer;
     private Player mousePlayer;
-    private int mouseWins;
-    private int catWins;
-    private int mouseWinStreak;
     private boolean verbose;
 
     public CatMouseGame(int width, int height, float timeStepReward, boolean verbose) {
@@ -90,72 +88,43 @@ public class CatMouseGame {
         return false;
     }
 
-    public int runBatch(int numEpisodes) {
-        mouseWins = catWins = 0;
-        int numSteps = 0;
-        for (int i = 0; i < numEpisodes; i++) {
-            numSteps += runEpisode();
-        }
-        //System.out.println("Total steps in batch: " + numSteps);
-        return mouseWins;
-    }
 
-    public int runEpisode() {
-        int step = 0;
-        printGame();
-        while (!isGameOver()) {
-            if (step % 2 == 0) {
-                processMove(mousePos, mousePlayer.makeMove(this, timeStepReward));
-            }
-            else {
-                processMove(catPos, catPlayer.makeMove(this, timeStepReward));
-            }
-            printGame();
-            step++;
+    public void step() {
+        if (isGameOver()) {
+            throw new RuntimeException("Cannot call step when game is over");
+        }
+        if (step > 1e6) {
+            throw new RuntimeException("Too many steps for this episode: " + step);
         }
 
-        boolean didMouseWin;
-
+        if (step % 2 == 0) {
+            processMove(mousePos, mousePlayer.makeMove(this, timeStepReward));
+        }
+        else {
+            processMove(catPos, catPlayer.makeMove(this, timeStepReward));
+        }
         if (mousePos.equals(catPos)) {
             mousePlayer.makeMove(this, -1f);
-            didMouseWin = false;
-            catWins++;
-            mouseWinStreak = 0;
         }
         else if (mousePos.equals(CheesePos)){
             mousePlayer.makeMove(this, 1f);
-            didMouseWin = true;
-            mouseWins++;
-            mouseWinStreak++;
         }
-        else {
-            throw new RuntimeException("Unexpected termination");
-        }
-
-        if (verbose) {
-            System.out.print("Episode " + episodeCount() + " ");
-            if (didMouseWin) {
-                System.out.print("Mouse wins! ");
-            }
-            else {
-                System.out.print("Mouse loses :-( ");
-            }
-            System.out.println("Mouse wins " + (((float) mouseWins) / episodeCount() * 100) + "% of the time (win streak = " + mouseWinStreak + ") " + step);
-        }
-
-        endEpisode();
-        return step;
+        step++;
     }
 
-    private void endEpisode() {
+    public boolean didMouseWin() {
+        if (!isGameOver()) {
+            throw new RuntimeException("Can only assess winner if isGameOver");
+        }
+        return mousePos.equals(CheesePos) ? true : false;
+    }
+
+    public void resetEpisode() {
+        step = 0;
         catPos = new Point(1, 1);
         mousePos = new Point(width - 1, height - 1);
         catPlayer.endEpisode();
         mousePlayer.endEpisode();
-    }
-
-    private int episodeCount() {
-        return mouseWins + catWins;
     }
 
     private void processMove(Point pos, Player.Move move) {
@@ -223,17 +192,5 @@ public class CatMouseGame {
             System.out.print('-');
         }
         System.out.println();
-    }
-
-    public static void main(String[] args) {
-        CatMouseGame game = new CatMouseGame(5, 5, -.05f, false);
-        game.setCatPlayer(new SimpleCatPlayer());
-        game.setMousePlayer(new SarsaMousePlayer(game));
-
-        int numEpisodesPerBatch = 100;
-        for (int i = 0; i < 100; i++) {
-            int mouseWins = game.runBatch(numEpisodesPerBatch);
-            System.out.println("Batch " + (i + 1) + " Mouse wins " + (mouseWins * 100 / numEpisodesPerBatch) + "% of the time");
-        }
     }
 }
