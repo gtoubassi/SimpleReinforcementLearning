@@ -71,9 +71,14 @@ public class SwingMain implements ActionListener {
         speedSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                timer.stop();
+                boolean running = timer.isRunning();
+                if (running) {
+                    timer.stop();
+                }
                 timer.setDelay(speedSlider.getValue());
-                timer.start();
+                if (running) {
+                    timer.start();
+                }
             }
         });
         frame.getContentPane().add(speedSlider);
@@ -97,7 +102,7 @@ public class SwingMain implements ActionListener {
         frame.setVisible(true);
 
         timer = new Timer(speedSlider.getValue(), this);
-        timer.start();
+        //timer.start();
     }
 
     @Override
