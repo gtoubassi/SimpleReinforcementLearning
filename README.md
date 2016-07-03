@@ -14,8 +14,10 @@ loses.  If the mouse touches the cheese the player wins.
 
 A "win" garners a +1 reward, a "loss" a -1.  All other moves have a configurable reward which should either be zero, or a small negative reward to encourage faster game play.
 
-Run `org.toubassi.rl.catmouse.CatMouseGame` to see training results.  Specifying
-verbose=true in the CatMouseGame constructor will show you the state of the game
+Run `org.toubassi.rl.catmouse.commandline.CommandLineMain` to see training results
+on the command line.  You can also run `org.toubassi.rl.catmouse.swing.SwingMain`
+to run an interactive Swing based GUI to see the moves as they happen.
+Specifying verbose=true in the CatMouseGame constructor will show you the state of the game
 board at each time step (lots of output!).  You can also customize the size of the
 game board, but beware state representations for game boards more then about 50x50
 consume a lot of memory (since our Q(s,a) vector is a naive lookup table).
