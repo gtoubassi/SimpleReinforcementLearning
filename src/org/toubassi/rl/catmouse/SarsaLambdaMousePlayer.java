@@ -1,8 +1,5 @@
 package org.toubassi.rl.catmouse;
 
-import java.util.Arrays;
-import java.util.Random;
-
 /**
  * Implements SARSA(lambda).  This performs a bit better then SARSA because
  * values are propagated back over the entire trajectory when encountered
@@ -23,7 +20,7 @@ public class SarsaLambdaMousePlayer extends SarsaMousePlayer {
     }
 
     public SarsaLambdaMousePlayer(CatMouseGame game, float epsilon, float alpha, float lambda, float gamma) {
-        super(game, epsilon, alpha, gamma);
+        super(game, epsilon, alpha, gamma, false);
         this.lambda = lambda;
         E = new ActionValueTable(Q.getNumStates(), Q.getNumActions());
     }

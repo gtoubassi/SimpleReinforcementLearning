@@ -10,21 +10,28 @@ public class SarsaMousePlayer extends Player {
     protected ActionValueTable Q;
     protected int maxPlayerState;
     protected int[][] positionToPlayerState;
+    protected int[] stateVisitCount;
     protected float epsilon;
     protected float alpha;
     protected float gamma;
     protected int lastState = -1;
     protected int lastAction;
     protected boolean wasLastActionRandom;
+    protected boolean rewardExploration;
 
     public SarsaMousePlayer(CatMouseGame game) {
-        this(game, .1f, .90f, .95f);
+        this(game, false);
     }
 
-    public SarsaMousePlayer(CatMouseGame game, float epsilon, float alpha, float gamma) {
+    public SarsaMousePlayer(CatMouseGame game, boolean rewardExploration) {
+        this(game, .1f, .90f, .95f, rewardExploration);
+    }
+
+    public SarsaMousePlayer(CatMouseGame game, float epsilon, float alpha, float gamma, boolean rewardExploration) {
         this.epsilon = epsilon;
         this.alpha = alpha;
         this.gamma = gamma;
+        this.rewardExploration = rewardExploration;
 
         // Calculate how many unique states the player can be in.
         // This is basically width * height - # of interior walls.
@@ -47,12 +54,18 @@ public class SarsaMousePlayer extends Player {
         // linearize) one dimension for each player which ranges
         // [0, maxPlayerState).
         this.Q = new ActionValueTable(maxPlayerState * maxPlayerState, moves.length);
+        this.stateVisitCount = new int[maxPlayerState * maxPlayerState];
     }
 
     public Move makeMove(CatMouseGame game, float reward) {
         int state = stateForGame(game);
         int action = pickActionEpsilonGreedy(state);
         Move move = moves[action];
+
+        if (rewardExploration) {
+            stateVisitCount[state]++;
+            reward += 1.0 / Math.sqrt(stateVisitCount[state]);
+        }
 
         if (lastState != -1) {
             updateQForSarsa(lastState, lastAction, reward, state, action);

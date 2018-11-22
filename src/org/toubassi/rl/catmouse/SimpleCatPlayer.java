@@ -11,7 +11,7 @@ public class SimpleCatPlayer extends RandomMovePlayer {
         Point cat = game.getCatPosition();
         Point mouse = game.getMousePosition();
 
-        if (canCatSeeMouse(game, cat, mouse)) {
+        if (canCatSeeMouse(game, cat, mouse) && random.nextFloat() > .02) {
             int deltaX = mouse.x - cat.x;
             int deltaY = mouse.y - cat.y;
 

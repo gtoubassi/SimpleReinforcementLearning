@@ -1,7 +1,5 @@
 package org.toubassi.rl.catmouse;
 
-import java.util.Random;
-
 /**
  * A player that moves purely randomly.  It can be used for both
  * the cat or the mouse.

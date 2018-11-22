@@ -1,335 +1,46 @@
 # SimpleReinforcementLearning
 
-A simple demonstration of reinforcement learning using
+![Cat and Mouse Gameboard](https://raw.githubusercontent.com/gtoubassi/SimpleReinforcementLearning/assets/screenshot.png)
+
+A simple demonstration of table based reinforcement learning using
 [SARSA](https://en.wikipedia.org/wiki/State-Action-Reward-State-Action)
 learning.  The goal is to train an agent to play a game of cat and mouse.
-The game is played on a 5x5 grid.  The cheese is in the upper left ('*').
-The cat starts near the cheese ('c').  The mouse starts in the lower right 
-('m').  There is a barrier in the middle of the grid ('XXX') which the cat 
-cannot see through.  The cat will move around randomly until it can see the 
-mouse at which time it will move towards the mouse.
+The game is played on a 5x5 grid.  The "cheese" is always in the upper
+left of the playing board.  The mouse always starts in the lower right.
+There is a barrier in the middle of the grid which the cat cannot see
+through.  The cat will move around randomly until it can see the mouse
+at which time it will move towards the mouse.
 
 The player is the mouse.  If the cat catches (touches) the mouse the player
 loses.  If the mouse touches the cheese the player wins.
 
-A "win" garners a +1 reward, a "loss" a -1.  All other moves have a configurable reward which should either be zero, or a small negative reward to encourage faster game play.
+A "win" garners a +1 reward, a "loss" a -1.  All other moves have a
+configurable reward which should either be zero, or a small negative reward
+to encourage faster game play.
 
-Run `org.toubassi.rl.catmouse.commandline.CommandLineMain` to see training results
-on the command line.  You can also run `org.toubassi.rl.catmouse.swing.SwingMain`
-to run an interactive Swing based GUI to see the moves as they happen.
-Specifying verbose=true in the CatMouseGame constructor will show you the state of the game
-board at each time step (lots of output!).  You can also customize the size of the
-game board, but beware state representations for game boards more then about 50x50
-consume a lot of memory (since our Q(s,a) vector is a naive lookup table).
+### How to build
 
-Below is a sample run where the mouse manages to avoid the cat by going around the barrier the long way to get to the cheese.
+    % git clone https://github.com/gtoubassi/SimpleReinforcementLearning.git
+    % cd SimpleReinforcementLearning/src
+    % javac `find . -name '*.java' -print`
 
-    -------
-    |*    |
-    | c   |
-    | XXX |
-    |     |
-    |    m|
-    -------
-    -------
-    |*    |
-    | c   |
-    | XXX |
-    |     |
-    |   m |
-    -------
-    -------
-    |*    |
-    |c    |
-    | XXX |
-    |     |
-    |   m |
-    -------
-    -------
-    |*    |
-    |c    |
-    | XXX |
-    |   m |
-    |     |
-    -------
-    -------
-    |*    |
-    |c    |
-    | XXX |
-    |   m |
-    |     |
-    -------
-    -------
-    |*    |
-    |c    |
-    | XXX |
-    |  m  |
-    |     |
-    -------
-    -------
-    |*    |
-    |c    |
-    | XXX |
-    |  m  |
-    |     |
-    -------
-    -------
-    |*    |
-    |c    |
-    | XXX |
-    |  m  |
-    |     |
-    -------
-    -------
-    |*    |
-    | c   |
-    | XXX |
-    |  m  |
-    |     |
-    -------
-    -------
-    |*    |
-    | c   |
-    | XXX |
-    | m   |
-    |     |
-    -------
-    -------
-    |*    |
-    | c   |
-    | XXX |
-    | m   |
-    |     |
-    -------
-    -------
-    |*    |
-    | c   |
-    | XXX |
-    | m   |
-    |     |
-    -------
-    -------
-    |*    |
-    |c    |
-    | XXX |
-    | m   |
-    |     |
-    -------
-    -------
-    |*    |
-    |c    |
-    | XXX |
-    | m   |
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    |cXXX |
-    | m   |
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    |cXXX |
-    |  m  |
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    |cXXX |
-    |  m  |
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    |cXXX |
-    |   m |
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXX |
-    |c  m |
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXX |
-    |c    |
-    |   m |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXX |
-    | c   |
-    |   m |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXX |
-    | c m |
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXX |
-    |  cm |
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXX |
-    |  c m|
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXX |
-    |   cm|
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXXm|
-    |   c |
-    |     |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXXm|
-    |     |
-    |   c |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXXm|
-    |     |
-    |   c |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXXm|
-    |     |
-    |   c |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXXm|
-    |     |
-    |   c |
-    -------
-    -------
-    |*    |
-    |     |
-    | XXXm|
-    |   c |
-    |     |
-    -------
-    -------
-    |*    |
-    |    m|
-    | XXX |
-    |   c |
-    |     |
-    -------
-    -------
-    |*    |
-    |    m|
-    | XXX |
-    |    c|
-    |     |
-    -------
-    -------
-    |*    |
-    |   m |
-    | XXX |
-    |    c|
-    |     |
-    -------
-    -------
-    |*    |
-    |   m |
-    | XXXc|
-    |     |
-    |     |
-    -------
-    -------
-    |*    |
-    |   m |
-    | XXXc|
-    |     |
-    |     |
-    -------
-    -------
-    |*    |
-    |   mc|
-    | XXX |
-    |     |
-    |     |
-    -------
-    -------
-    |*    |
-    |  m c|
-    | XXX |
-    |     |
-    |     |
-    -------
-    -------
-    |*    |
-    |  mc |
-    | XXX |
-    |     |
-    |     |
-    -------
-    -------
-    |*    |
-    | m c |
-    | XXX |
-    |     |
-    |     |
-    -------
-    -------
-    |*    |
-    | mc  |
-    | XXX |
-    |     |
-    |     |
-    -------
-    -------
-    |*m   |
-    |  c  |
-    | XXX |
-    |     |
-    |     |
-    -------
-    -------
-    |*mc  |
-    |     |
-    | XXX |
-    |     |
-    |     |
-    -------
-    -------
-    |m c  |
-    |     |
-    | XXX |
-    |     |
-    |     |
-    -------
-    Mouse wins!
+### How to run the command line version
+
+    % java org.toubassi.rl.catmouse.commandline.CommandLineMain
+
+### How to run the swing (gui) version
+
+    % java org.toubassi.rl.catmouse.swing.SwingMain
+
+
+You can run with a larger boardsize which is more difficult to learn
+via the `--bigboard` command line argument.  This uses a 30x30 board
+instead of the default 5x5.
+
+You can also reward exploration via the `--explore` command line
+argument.  Exploration is encouraged by adding a synthetic reward to
+the environment reward which is based on the number of times the
+reached state has been seen (1/sqrt(n)).  This reduces the learning
+time significantly.  With `--bigboard` and no exploration it takes
+~20,000 games before it is winning 95% of the time.  With ``--explore``
+it takes ~70,000.
