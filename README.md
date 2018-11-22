@@ -1,6 +1,6 @@
 # SimpleReinforcementLearning
 
-![Cat and Mouse Gameboard](https://raw.githubusercontent.com/gtoubassi/SimpleReinforcementLearning/assets/screenshot.png)
+![Cat and Mouse Gameboard](https://github.com/gtoubassi/SimpleReinforcementLearning/raw/master/assets/screenshot.png)
 
 A simple demonstration of table based reinforcement learning using
 [SARSA](https://en.wikipedia.org/wiki/State-Action-Reward-State-Action)
