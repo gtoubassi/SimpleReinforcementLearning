@@ -42,5 +42,5 @@ argument.  Exploration is encouraged by adding a synthetic reward to
 the environment reward which is based on the number of times the
 reached state has been seen (1/sqrt(n)).  This reduces the learning
 time significantly.  With `--bigboard` and no exploration it takes
-~20,000 games before it is winning 95% of the time.  With ``--explore``
+~200,000 games before it is winning 95% of the time.  With ``--explore``
 it takes ~70,000.
